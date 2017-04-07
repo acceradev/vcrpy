@@ -1,6 +1,8 @@
 import warnings
 from six import BytesIO, text_type
 from six.moves.urllib.parse import urlparse, parse_qsl
+import time
+
 from .util import CaseInsensitiveDict
 
 
@@ -9,7 +11,7 @@ class Request(object):
     VCR's representation of a request.
     """
 
-    def __init__(self, method, uri, body, headers):
+    def __init__(self, method, uri, body, headers, timestamp=None):
         self.method = method
         self.uri = uri
         self._was_file = hasattr(body, 'read')
@@ -18,6 +20,7 @@ class Request(object):
         else:
             self.body = body
         self.headers = headers
+        self.timestamp = timestamp if timestamp else time.time()
 
     @property
     def headers(self):
@@ -92,11 +95,12 @@ class Request(object):
             'uri': self.uri,
             'body': self.body,
             'headers': dict(((k, [v]) for k, v in self.headers.items())),
+            'timestamp': self.timestamp
         }
 
     @classmethod
     def _from_dict(cls, dct):
-        return Request(**dct)
+        return cls(**dct)
 
 
 class HeadersDict(CaseInsensitiveDict):

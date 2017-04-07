@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import asyncio
 import functools
 import json
+import time
 
 from aiohttp import ClientResponse
 from yarl import URL
@@ -49,11 +50,14 @@ def vcr_request(cassette, real_request):
             response.content = vcr_response['body']['string']
             response.reason = vcr_response['status']['message']
             response.headers = vcr_response['headers']
+            response.latency = vcr_response['latency']
 
             response.close()
             return response
 
         if cassette.write_protected and cassette.filter_request(vcr_request):
+            # TODO: throw error instead of 599 code
+            # it will be more simple to identify if we should interrupt connection
             response = MockClientResponse(method, URL(url))
             response.status = 599
             msg = ("No match for the request {!r} was found. Can't overwrite "
@@ -63,7 +67,9 @@ def vcr_request(cassette, real_request):
             response.close()
             return response
 
+        request_start = time.perf_counter()
         response = yield from real_request(self, method, url, **kwargs)  # NOQA: E999
+        latency = time.perf_counter() - request_start
 
         vcr_response = {
             'status': {
@@ -73,6 +79,7 @@ def vcr_request(cassette, real_request):
             'headers': dict(response.headers),
             'body': {'string': (yield from response.text())},  # NOQA: E999
             'url': response.url,
+            'latency': latency
         }
         cassette.append(vcr_request, vcr_response)
 
