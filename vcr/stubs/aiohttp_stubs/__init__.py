@@ -82,7 +82,7 @@ def vcr_request(cassette, real_request):
             'latency': latency
         }
         cassette.append(vcr_request, vcr_response)
-
+        response.latency = latency
         return response
 
     return new_request
