@@ -114,4 +114,5 @@ def test_params_same_url_distinct_params(tmpdir, scheme):
     with vcr.use_cassette(str(tmpdir.join('get.yaml'))) as cassette:
         response, cassette_response_text = get(url, as_text=True, params=other_params)
         assert 'No match for the request' in cassette_response_text
+        # TODO: fix test
         assert response.status == 599

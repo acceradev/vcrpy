@@ -10,6 +10,7 @@ from aiohttp import ClientResponse
 from yarl import URL
 
 from vcr.request import Request
+from vcr.errors import UnhandledHTTPRequestError
 
 
 class MockClientResponse(ClientResponse):
@@ -58,14 +59,15 @@ def vcr_request(cassette, real_request):
         if cassette.write_protected and cassette.filter_request(vcr_request):
             # TODO: throw error instead of 599 code
             # it will be more simple to identify if we should interrupt connection
-            response = MockClientResponse(method, URL(url))
-            response.status = 599
-            msg = ("No match for the request {!r} was found. Can't overwrite "
-                   "existing cassette {!r} in your current record mode {!r}.")
-            msg = msg.format(vcr_request, cassette._path, cassette.record_mode)
-            response.content = msg.encode()
-            response.close()
-            return response
+            # response = MockClientResponse(method, URL(url))
+            # response.status = 599
+            # msg = ("No match for the request {!r} was found. Can't overwrite "
+            #        "existing cassette {!r} in your current record mode {!r}.")
+            # msg = msg.format(vcr_request, cassette._path, cassette.record_mode)
+            # response.content = msg.encode()
+            # response.close()
+            # return response
+            raise UnhandledHTTPRequestError()
 
         request_start = time.perf_counter()
         response = yield from real_request(self, method, url, **kwargs)  # NOQA: E999
@@ -82,7 +84,6 @@ def vcr_request(cassette, real_request):
             'latency': latency
         }
         cassette.append(vcr_request, vcr_response)
-        response.latency = latency
         return response
 
     return new_request
