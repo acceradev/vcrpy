@@ -94,7 +94,7 @@ class Request(object):
             'method': self.method,
             'uri': self.uri,
             'body': self.body,
-            'headers': dict(((k, [v]) for k, v in self.headers.items())),
+            'headers': dict(((str(k), [v]) for k, v in self.headers.items())),
             'timestamp': self.timestamp
         }
 

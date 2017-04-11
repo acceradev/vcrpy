@@ -82,7 +82,7 @@ def vcr_request(cassette, real_request):
                 'code': response.status,
                 'message': response.reason,
             },
-            'headers': dict(response.headers),
+            'headers': dict(((str(k), v) for k, v in response.headers.items())),
             'body': {'string': (yield from response.read())},  # NOQA: E999
             'url': response.url,
             'latency': latency
