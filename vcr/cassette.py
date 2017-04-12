@@ -207,7 +207,11 @@ class Cassette(object):
 
     def append(self, request, response):
         """Add a request, response pair to this cassette"""
+        if request in self:
+            return
+
         request = self._before_record_request(request)
+
         if not request:
             return
         response = self._before_record_response(response)
@@ -241,9 +245,9 @@ class Cassette(object):
         hasn't been played back before, and mark it as played
         """
         for index, response in self._responses(request):
-            if self.play_counts[index] == 0:
-                self.play_counts[index] += 1
-                return response
+            # if self.play_counts[index] == 0:
+            #     self.play_counts[index] += 1
+            return response
         # The cassette doesn't contain the request asked for.
         raise UnhandledHTTPRequestError(
             "The cassette (%r) doesn't contain the request (%r) asked for"
