@@ -94,7 +94,7 @@ def vcr_request(cassette, real_request):
             # Create fake response on errors
             vcr_response = {
                 'status': {
-                    'code': 400,
+                    'code': 490,
                     'error': str(e.__class__),
                     'message': str(e)
                 },
