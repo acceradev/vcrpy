@@ -95,11 +95,11 @@ def vcr_request(cassette, real_request):
             vcr_response = {
                 'status': {
                     'code': 400,
-                    'error': str(type(e)),
+                    'error': str(e.__class__),
                     'message': str(e)
                 },
                 'headers': {},
-                'body': {'string': ''},
+                'body': {'string': str(e)},
                 'url': str(request_url),
                 'latency': 0
 
