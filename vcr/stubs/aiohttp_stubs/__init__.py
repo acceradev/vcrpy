@@ -6,6 +6,7 @@ import functools
 import json
 import time
 
+import aiohttp
 from aiohttp import ClientResponse
 from yarl import URL
 
@@ -73,20 +74,37 @@ def vcr_request(cassette, real_request):
             # return response
             raise UnhandledHTTPRequestError()
 
-        request_start = time.perf_counter()
-        response = yield from real_request(self, method, url, **kwargs)  # NOQA: E999
-        latency = time.perf_counter() - request_start
+        try:
+            request_start = time.perf_counter()
+            response = yield from real_request(self, method, url, **kwargs)  # NOQA: E999
+            latency = time.perf_counter() - request_start
 
-        vcr_response = {
-            'status': {
-                'code': response.status,
-                'message': response.reason,
-            },
-            'headers': dict(((str(k), v) for k, v in response.headers.items())),
-            'body': {'string': (yield from response.read())},  # NOQA: E999
-            'url': response.url,
-            'latency': latency
-        }
+            vcr_response = {
+                'status': {
+                    'code': response.status,
+                    'message': response.reason,
+                },
+                'headers': dict(((str(k), v) for k, v in response.headers.items())),
+                'body': {'string': (yield from response.read())},  # NOQA: E999
+                'url': response.url,
+                'latency': latency
+            }
+        except aiohttp.ClientError as e:
+            # Create fake response on errors
+            vcr_response = {
+                'status': {
+                    'error': str(type(e)),
+                    'message': str(e)
+                }
+            }
+            response = MockClientResponse(method, request_url)
+            response.status = 400
+            response.content = str(e)
+            response.reason = str(e)
+            response.headers = {}
+            response.latency = 0
+            response.close()
+
         cassette.append(vcr_request, vcr_response)
         return response
 
