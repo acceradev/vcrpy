@@ -100,7 +100,7 @@ def vcr_request(cassette, real_request):
                 },
                 'headers': {},
                 'body': {'string': str(e)},
-                'url': str(request_url),
+                'url': request_url,
                 'latency': 0
 
             }
