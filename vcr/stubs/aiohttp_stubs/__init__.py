@@ -57,6 +57,7 @@ def vcr_request(cassette, real_request):
             response.reason = vcr_response['status']['message']
             response.headers = vcr_response['headers']
             response.latency = vcr_response['latency']
+            response.error = vcr_response['status'].get('error')
 
             response.close()
             return response
@@ -93,16 +94,23 @@ def vcr_request(cassette, real_request):
             # Create fake response on errors
             vcr_response = {
                 'status': {
+                    'code': 400,
                     'error': str(type(e)),
                     'message': str(e)
-                }
+                },
+                'headers': {},
+                'body': {'string': ''},
+                'url': str(request_url),
+                'latency': 0
+
             }
             response = MockClientResponse(method, request_url)
-            response.status = 400
-            response.content = str(e)
-            response.reason = str(e)
-            response.headers = {}
-            response.latency = 0
+            response.status = vcr_response['status']['code']
+            response.content = vcr_response['body']['string']
+            response.reason = vcr_response['status']['message']
+            response.headers = vcr_response['headers']
+            response.latency = vcr_response['latency']
+            response.error = vcr_response['status']['error']
             response.close()
 
         cassette.append(vcr_request, vcr_response)
