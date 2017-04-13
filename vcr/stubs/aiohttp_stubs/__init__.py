@@ -50,14 +50,14 @@ def vcr_request(cassette, real_request):
 
         if cassette.can_play_response_for(vcr_request):
             vcr_response = cassette.play_response(vcr_request)
-
+            if vcr_response['status'].get('error'):
+                raise UnhandledHTTPRequestError()
             response = MockClientResponse(method, URL(vcr_response.get('url')))
             response.status = vcr_response['status']['code']
             response.content = vcr_response['body']['string']
             response.reason = vcr_response['status']['message']
             response.headers = vcr_response['headers']
             response.latency = vcr_response['latency']
-            response.error = vcr_response['status'].get('error')
 
             response.close()
             return response
