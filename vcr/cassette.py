@@ -228,7 +228,8 @@ class Cassette(object):
         self.length += 1
         if 'error' not in response['status']:
             self.success += 1
-        path = os.path.join(self._path, '{number:03}'.format(number=self.length))
+        path = os.path.join(self._path, '{number:03}{extension}'.format(
+            number=self.length, extension=self._serializer.extension))
         self._persister.save_cassette(path, {'requests': [request], 'responses': [response]}, self._serializer)
 
     def filter_request(self, request):

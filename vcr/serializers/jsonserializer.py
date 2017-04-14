@@ -3,6 +3,8 @@ try:
 except ImportError:
     import json
 
+extension = '.json'
+
 
 def deserialize(cassette_string):
     return json.loads(cassette_string)
