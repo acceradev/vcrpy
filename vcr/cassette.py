@@ -222,13 +222,13 @@ class Cassette(object):
             return
         self.data.append((request, response))
         self.dirty = True
+        self.length += 1
+        if 'error' not in response['status']:
+            self.success += 1
         if not loading:
             self._save_pair(request, response)
 
     def _save_pair(self, request, response):
-        self.length += 1
-        if 'error' not in response['status']:
-            self.success += 1
         path = os.path.join(self._path, '{number:03}{extension}'.format(
             number=self.length, extension=self._serializer.extension))
         self._persister.save_cassette(path, {'requests': [request], 'responses': [response]}, self._serializer)
