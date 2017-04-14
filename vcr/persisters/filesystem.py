@@ -11,6 +11,7 @@ class FilesystemPersister(object):
         try:
             requests, responses = [], []
             records_files = [os.path.join(cassette_path, f) for f in os.listdir(cassette_path) if os.path.isfile(os.path.join(cassette_path, f)) and f.endswith('.yml')]
+            records_files.sort()
             for file in records_files:
                 with open(file) as f:
                     cassette_content = f.read()

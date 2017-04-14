@@ -208,7 +208,7 @@ class Cassette(object):
         return self.rewound and self.record_mode == 'once' or \
             self.record_mode == 'none'
 
-    def append(self, request, response):
+    def append(self, request, response, loading=False):
         """Add a request, response pair to this cassette"""
         if request in self:
             return
@@ -221,8 +221,9 @@ class Cassette(object):
         if response is None:
             return
         self.data.append((request, response))
-        self._save_pair(request, response)
         self.dirty = True
+        if not loading:
+            self._save_pair(request, response)
 
     def _save_pair(self, request, response):
         self.length += 1
@@ -301,7 +302,7 @@ class Cassette(object):
                 serializer=self._serializer,
             )
             for request, response in zip(requests, responses):
-                self.append(request, response)
+                self.append(request, response, loading=True)
             self.dirty = False
             self.rewound = True
         except ValueError:
