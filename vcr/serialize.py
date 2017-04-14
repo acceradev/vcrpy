@@ -41,11 +41,9 @@ def deserialize(cassette_string, serializer):
     if _looks_like_an_old_cassette(data):
         _warn_about_old_cassette_format()
 
-    requests = [Request._from_dict(r['request']) for r in data['interactions']]
-    responses = [
-        compat.convert_to_bytes(r['response']) for r in data['interactions']
-    ]
-    return requests, responses
+    request = Request._from_dict(data['interactions'][0]['request'])
+    response = compat.convert_to_bytes(data['interactions'][0]['response'])
+    return request, response
 
 
 def serialize(cassette_dict, serializer):

@@ -1,3 +1,4 @@
+import os
 import sys
 import inspect
 import logging
@@ -59,7 +60,7 @@ class CassetteContextDecorator(object):
             ))
             # TODO(@IvanMalison): Hmmm. it kind of feels like this should be
             # somewhere else.
-            cassette._save()
+            # cassette._save()
 
     def __enter__(self):
         # This assertion is here to prevent the dangerous behavior
@@ -182,6 +183,8 @@ class Cassette(object):
         self.play_counts = collections.Counter()
         self.dirty = False
         self.rewound = False
+        self.length = 0
+        self.success = 0
 
     @property
     def play_count(self):
@@ -218,7 +221,15 @@ class Cassette(object):
         if response is None:
             return
         self.data.append((request, response))
+        self._save_pair(request, response)
         self.dirty = True
+
+    def _save_pair(self, request, response):
+        self.length += 1
+        if 'error' not in response['status']:
+            self.success += 1
+        path = os.path.join(self._path, '{number:03}'.format(number=self.length))
+        self._persister.save_cassette(path, {'requests': [request], 'responses': [response]}, self._serializer)
 
     def filter_request(self, request):
         return self._before_record_request(request)

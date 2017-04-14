@@ -9,11 +9,17 @@ class FilesystemPersister(object):
     @classmethod
     def load_cassette(cls, cassette_path, serializer):
         try:
-            with open(cassette_path) as f:
-                cassette_content = f.read()
+            requests, responses = [], []
+            records_files = [os.path.join(cassette_path, f) for f in os.listdir(cassette_path) if os.path.isfile(os.path.join(cassette_path, f)) and f.endswith('.yml')]
+            for file in records_files:
+                with open(file) as f:
+                    cassette_content = f.read()
+                    request, response = deserialize(cassette_content, serializer)
+                    requests.append(request)
+                    responses.append(response)
+            cassette = (requests, responses)
         except IOError:
             raise ValueError('Cassette not found.')
-        cassette = deserialize(cassette_content, serializer)
         return cassette
 
     @staticmethod
