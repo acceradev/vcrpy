@@ -112,7 +112,7 @@ def vcr_request(cassette, real_request):
             response.latency = vcr_response['latency']
             response.error = vcr_response['status']['error']
             response.close()
-
+        vcr_response['index'] = cassette.length + 1
         cassette.append(vcr_request, vcr_response)
         return response
 
