@@ -229,7 +229,7 @@ class Cassette(object):
             self._save_pair(request, response)
 
     def _save_pair(self, request, response):
-        path = os.path.join(self._path, '{number}{extension}'.format(
+        path = os.path.join(self._path, '{number:03}{extension}'.format(
             number=self.length, extension=self._serializer.extension))
         self._persister.save_cassette(path, {'requests': [request], 'responses': [response]}, self._serializer)
 
